@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
-import io, { Socket } from 'socket.io-client';
+import io from 'socket.io-client';
 
 interface Option {
   id: number;
@@ -40,8 +40,7 @@ export default function LiveQuiz() {
   const [isConnected, setIsConnected] = useState(false);
   const [debug, setDebug] = useState<string[]>([]);
 
-  const socketRef = useRef<Socket | null>(null);
-  const reconnectAttempts = useRef(0);
+  const socketRef = useRef<any>(null);
 
   const addDebug = (msg: string) => {
     console.log('🔍', msg);
@@ -51,11 +50,9 @@ export default function LiveQuiz() {
   useEffect(() => {
     addDebug(`🚀 Страница загружена. Комната: ${roomCode}, Имя: ${userName}`);
 
-    // Создаём подключение
-    if (!socketRef.current || !socketRef.current.connected) {
+    if (!socketRef.current) {
       addDebug('🔌 Создаём новое подключение к WebSocket...');
-      
-      socketRef.current = io('http://https://quiz-app-production-e651.up.railway.app', {
+      socketRef.current = io('https://quiz-app-production-e651.up.railway.app', {
         transports: ['websocket', 'polling'],
         reconnection: true,
         reconnectionAttempts: 10,
@@ -67,24 +64,13 @@ export default function LiveQuiz() {
 
     const socket = socketRef.current;
 
-    // Обработка подключения
     const onConnect = () => {
       addDebug(`✅ ПОДКЛЮЧЕНО к WebSocket! ID: ${socket.id}`);
       setIsConnected(true);
-      reconnectAttempts.current = 0;
-      
-      // Присоединяемся к комнате
       addDebug(`🔑 Присоединяемся к комнате ${roomCode}...`);
       socket.emit('join-room', roomCode, userName);
     };
 
-    // Обработка переподключения
-    const onReconnect = (attemptNumber: number) => {
-      addDebug(`🔄 Переподключение #${attemptNumber}...`);
-      reconnectAttempts.current = attemptNumber;
-    };
-
-    // Обработка ошибок
     const onConnectError = (err: Error) => {
       addDebug(`❌ Ошибка подключения: ${err.message}`);
       setIsConnected(false);
@@ -94,7 +80,6 @@ export default function LiveQuiz() {
       addDebug(`❌ Ошибка: ${msg}`);
     };
 
-    // Получение вопроса
     const onQuestion = (data: Question) => {
       addDebug(`📨 ПОЛУЧЕН ВОПРОС: ${data.questionText}`);
       setQuestion(data);
@@ -138,9 +123,7 @@ export default function LiveQuiz() {
       setIsConnected(false);
     };
 
-    // Подписываемся на события
     socket.on('connect', onConnect);
-    socket.on('reconnect_attempt', onReconnect);
     socket.on('connect_error', onConnectError);
     socket.on('error', onError);
     socket.on('question', onQuestion);
@@ -149,15 +132,12 @@ export default function LiveQuiz() {
     socket.on('quiz-started', onQuizStarted);
     socket.on('disconnect', onDisconnect);
 
-    // Если сокет уже подключен — вызываем сразу
     if (socket.connected) {
       onConnect();
     }
 
-    // Cleanup
     return () => {
       socket.off('connect', onConnect);
-      socket.off('reconnect_attempt', onReconnect);
       socket.off('connect_error', onConnectError);
       socket.off('error', onError);
       socket.off('question', onQuestion);

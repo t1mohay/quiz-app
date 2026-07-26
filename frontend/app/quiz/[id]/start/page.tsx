@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import io, { Socket } from 'socket.io-client';
+import io from 'socket.io-client';
 
-let socket: Socket | null = null;
+const socket = io('https://quiz-app-production-e651.up.railway.app');
 
 export default function StartQuiz() {
   const params = useParams();
@@ -19,12 +19,6 @@ export default function StartQuiz() {
   const [isQuizStarted, setIsQuizStarted] = useState(false);
 
   useEffect(() => {
-    if (!socket) {
-      socket = io('http://https://quiz-app-production-e651.up.railway.app', {
-        transports: ['websocket', 'polling']
-      });
-    }
-
     socket.on('connect', () => {
       console.log('✅ Подключено к WebSocket');
       setIsConnected(true);
@@ -53,13 +47,11 @@ export default function StartQuiz() {
     });
 
     return () => {
-      if (socket) {
-        socket.off('connect');
-        socket.off('room-created');
-        socket.off('players-update');
-        socket.off('quiz-started');
-        socket.off('error');
-      }
+      socket.off('connect');
+      socket.off('room-created');
+      socket.off('players-update');
+      socket.off('quiz-started');
+      socket.off('error');
     };
   }, []);
 
