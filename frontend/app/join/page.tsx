@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import io, { Socket } from 'socket.io-client';
+import io from 'socket.io-client';
 
-const socket: Socket = io('http://https://quiz-app-production-e651.up.railway.app');
+const socket = io('https://quiz-app-production-e651.up.railway.app');
 
 export default function JoinQuiz() {
   const router = useRouter();
@@ -18,7 +18,14 @@ export default function JoinQuiz() {
       return;
     }
 
+    if (roomCode.length !== 6) {
+      setError('Код должен быть 6 символов');
+      return;
+    }
+
+    console.log('🔑 Присоединение к комнате:', roomCode, 'Имя:', userName);
     socket.emit('join-room', roomCode, userName);
+    
     router.push(`/quiz/live/${roomCode}?name=${encodeURIComponent(userName)}`);
   };
 
@@ -39,7 +46,7 @@ export default function JoinQuiz() {
             <input
               type="text"
               value={roomCode}
-              onChange={(e) => setRoomCode(e.target.value)}
+              onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
               placeholder="Введите 6-значный код"
               className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 bg-white text-center text-2xl tracking-widest"
               style={{ color: '#000000 !important' }}
