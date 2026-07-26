@@ -12,13 +12,14 @@ dotenv.config();
 const app = express();
 const httpServer = createServer(app);
 
-// --- НАСТРОЙКА CORS (ДОБАВЛЕН НОВЫЙ URL) ---
+
 const allowedOrigins = [
   'http://localhost:3000',
   'https://quiz-app-franken.vercel.app',
   'https://quiz-app-git-main-franken.vercel.app',
   'https://quiz-app-eight-steel-45.vercel.app',
-  'https://quiz-ddnc581t3-franken.vercel.app'  // ← ДОБАВЛЕН НОВЫЙ URL
+  'https://quiz-ddnc581t3-franken.vercel.app',
+  'https://quiz-lwgx2bi4h-franken.vercel.app', 
 ];
 
 app.use(cors({
