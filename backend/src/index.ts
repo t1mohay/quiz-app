@@ -11,9 +11,23 @@ dotenv.config();
 
 const app = express();
 const httpServer = createServer(app);
+
+// --- НАСТРОЙКА CORS (ИСПРАВЛЕНА) ---
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://quiz-app-franken.vercel.app',
+  'https://quiz-app-git-main-franken.vercel.app'
+];
+
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE']
+}));
+
 const io = new SocketServer(httpServer, {
   cors: {
-    origin: ['http://localhost:3000', 'https://quiz-app-git-main-franken.vercel.app', 'https://quiz-app-franken.vercel.app'],
+    origin: allowedOrigins,
     methods: ["GET", "POST"],
     credentials: true
   }
@@ -21,17 +35,13 @@ const io = new SocketServer(httpServer, {
 
 const prisma = new PrismaClient();
 
-app.use(cors({
-  origin: ['http://localhost:3000', 'https://quiz-app-git-main-franken.vercel.app', 'https://quiz-app-franken.vercel.app'],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE']
-}));
-
 app.use(express.json());
 
+// Роуты
 app.use('/api/auth', authRoutes);
 app.use('/api/quizzes', quizRoutes);
 
+// Тестовый роут
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'Quiz API работает!' });
 });
@@ -92,7 +102,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Подключение к комнате (с новой логикой переподключения)
+  // Подключение к комнате
   socket.on('join-room', (roomCode: string, userName: string) => {
     const room = rooms.get(roomCode);
     if (!room) {
@@ -100,7 +110,6 @@ io.on('connection', (socket) => {
       return;
     }
     
-    // НОВАЯ ЛОГИКА: Если игрок уже есть — удаляем старого и добавляем нового
     const existingPlayerIndex = room.players.findIndex(p => p.name === userName);
     if (existingPlayerIndex !== -1) {
       room.players.splice(existingPlayerIndex, 1);
@@ -116,7 +125,6 @@ io.on('connection', (socket) => {
     console.log(`👤 ${userName} присоединился к ${roomCode}`);
     console.log(`👥 Всего игроков: ${room.players.length}`);
     
-    // Если квиз уже активен — отправляем текущий вопрос новому игроку
     if (room.isActive && room.currentQuestion < room.questions.length) {
       const question = room.questions[room.currentQuestion];
       const questionData = {
@@ -160,7 +168,6 @@ io.on('connection', (socket) => {
     
     io.to(roomCode).emit('quiz-started');
     
-    // Отправляем первый вопрос через 2 секунды
     setTimeout(() => {
       sendQuestion(roomCode);
     }, 2000);
@@ -180,7 +187,6 @@ io.on('connection', (socket) => {
     }
 
     if (room.currentQuestion >= room.questions.length) {
-      // Квиз закончен
       const leaderboard = room.players
         .sort((a, b) => b.score - a.score)
         .map((p, index) => ({
@@ -211,7 +217,6 @@ io.on('connection', (socket) => {
     
     io.to(roomCode).emit('question', questionData);
 
-    // Таймер на ответ
     if (room.timer) clearTimeout(room.timer);
     const timeForAnswer = (question.timeForAnswer || 15) * 1000;
     room.timer = setTimeout(() => {
