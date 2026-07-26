@@ -12,11 +12,12 @@ dotenv.config();
 const app = express();
 const httpServer = createServer(app);
 
-// --- НАСТРОЙКА CORS (ИСПРАВЛЕНА) ---
+// --- НАСТРОЙКА CORS (ДОБАВЛЕН НОВЫЙ URL) ---
 const allowedOrigins = [
   'http://localhost:3000',
   'https://quiz-app-franken.vercel.app',
-  'https://quiz-app-git-main-franken.vercel.app'
+  'https://quiz-app-git-main-franken.vercel.app',
+  'https://quiz-app-eight-steel-45.vercel.app'
 ];
 
 app.use(cors({
@@ -61,7 +62,6 @@ const rooms: Map<string, Room> = new Map();
 io.on('connection', (socket) => {
   console.log('👤 Новый клиент:', socket.id);
 
-  // Создание комнаты
   socket.on('create-room', async (quizId: number) => {
     try {
       const roomCode = Math.floor(100000 + Math.random() * 900000).toString();
@@ -82,8 +82,6 @@ io.on('connection', (socket) => {
         return;
       }
 
-      console.log(`📚 Загружено вопросов: ${quiz.questions.length}`);
-
       rooms.set(roomCode, {
         quizId,
         players: [],
@@ -102,7 +100,6 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Подключение к комнате
   socket.on('join-room', (roomCode: string, userName: string) => {
     const room = rooms.get(roomCode);
     if (!room) {
@@ -141,7 +138,6 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Начало квиза
   socket.on('start-quiz', (roomCode: string) => {
     const room = rooms.get(roomCode);
     if (!room) {
@@ -162,10 +158,6 @@ io.on('connection', (socket) => {
     room.isActive = true;
     room.currentQuestion = 0;
     
-    console.log(`🎯 Квиз начат в комнате ${roomCode}`);
-    console.log(`📝 Всего вопросов: ${room.questions.length}`);
-    console.log(`👥 Участников: ${room.players.length}`);
-    
     io.to(roomCode).emit('quiz-started');
     
     setTimeout(() => {
@@ -173,18 +165,9 @@ io.on('connection', (socket) => {
     }, 2000);
   });
 
-  // Отправка вопроса
   function sendQuestion(roomCode: string) {
     const room = rooms.get(roomCode);
-    if (!room) {
-      console.log(`❌ Комната ${roomCode} не найдена`);
-      return;
-    }
-
-    if (!room.isActive) {
-      console.log(`❌ Комната ${roomCode} не активна`);
-      return;
-    }
+    if (!room || !room.isActive) return;
 
     if (room.currentQuestion >= room.questions.length) {
       const leaderboard = room.players
@@ -197,7 +180,6 @@ io.on('connection', (socket) => {
       
       io.to(roomCode).emit('quiz-ended', leaderboard);
       room.isActive = false;
-      console.log(`🏆 Квиз закончен в комнате ${roomCode}`);
       return;
     }
 
@@ -212,9 +194,6 @@ io.on('connection', (socket) => {
       timeForAnswer: question.timeForAnswer || 15
     };
 
-    console.log(`📝 Отправка вопроса ${room.currentQuestion + 1}/${room.questions.length}: ${question.questionText}`);
-    console.log(`📤 Отправка в комнату ${roomCode} (участников: ${room.players.length})`);
-    
     io.to(roomCode).emit('question', questionData);
 
     if (room.timer) clearTimeout(room.timer);
@@ -225,7 +204,6 @@ io.on('connection', (socket) => {
     }, timeForAnswer + 2000);
   }
 
-  // Получение ответа
   socket.on('answer', async (data: { 
     roomCode: string; 
     userName: string; 
@@ -233,16 +211,10 @@ io.on('connection', (socket) => {
     optionId: number 
   }) => {
     const room = rooms.get(data.roomCode);
-    if (!room || !room.isActive) {
-      console.log(`❌ Ответ получен, но комната не активна`);
-      return;
-    }
+    if (!room || !room.isActive) return;
 
     const player = room.players.find(p => p.name === data.userName);
-    if (!player) {
-      console.log(`❌ Игрок ${data.userName} не найден`);
-      return;
-    }
+    if (!player) return;
 
     try {
       const option = await prisma.answerOption.findUnique({
@@ -251,17 +223,13 @@ io.on('connection', (socket) => {
 
       if (option && option.isCorrect) {
         player.score += 10;
-        console.log(`✅ ${data.userName} ответил правильно! Счёт: ${player.score}`);
         socket.emit('score-update', { score: player.score });
-      } else {
-        console.log(`❌ ${data.userName} ответил неправильно`);
       }
     } catch (error) {
       console.error('Ошибка проверки ответа:', error);
     }
   });
 
-  // Отключение
   socket.on('disconnect', () => {
     const roomCode = socket.data.roomCode;
     const userName = socket.data.userName;
@@ -271,7 +239,6 @@ io.on('connection', (socket) => {
       if (room) {
         room.players = room.players.filter(p => p.name !== userName);
         io.to(roomCode).emit('players-update', room.players.map(p => p.name));
-        console.log(`👋 ${userName} покинул комнату ${roomCode}`);
       }
     }
     console.log('👋 Клиент отключился:', socket.id);
