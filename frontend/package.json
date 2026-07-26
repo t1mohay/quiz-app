@@ -26,5 +26,5 @@
     "tailwindcss": "^4",
     "typescript": "^5"
   },
-  "proxy": "http://https://quiz-app-production-e651.up.railway.app"
+  "proxy": "https://quiz-app-production-e651.up.railway.app"
 }

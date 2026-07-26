@@ -44,7 +44,7 @@ export default function Dashboard() {
 
   const fetchQuizCount = async (token: string) => {
     try {
-      const res = await fetch('http://https://quiz-app-production-e651.up.railway.app/api/quizzes/my', {
+      const res = await fetch('https://quiz-app-production-e651.up.railway.app/api/quizzes/my', {
         headers: {
           'Authorization': `Bearer ${token}`
         }

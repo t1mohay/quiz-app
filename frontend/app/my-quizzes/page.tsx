@@ -27,7 +27,7 @@ export default function MyQuizzes() {
   const fetchQuizzes = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://https://quiz-app-production-e651.up.railway.app/api/quizzes/my', {
+      const res = await fetch('https://quiz-app-production-e651.up.railway.app/api/quizzes/my', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -49,7 +49,7 @@ export default function MyQuizzes() {
 
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`http://https://quiz-app-production-e651.up.railway.app/api/quizzes/${id}`, {
+      const res = await fetch(`https://quiz-app-production-e651.up.railway.app/api/quizzes/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`

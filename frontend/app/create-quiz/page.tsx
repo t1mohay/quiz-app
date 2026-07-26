@@ -84,7 +84,7 @@ export default function CreateQuiz() {
 
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://https://quiz-app-production-e651.up.railway.app/api/quizzes', {
+      const res = await fetch('https://quiz-app-production-e651.up.railway.app/api/quizzes', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

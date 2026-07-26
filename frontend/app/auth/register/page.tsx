@@ -19,7 +19,7 @@ export default function Register() {
     setError('');
 
     try {
-      const res = await fetch('http://https://quiz-app-production-e651.up.railway.app/api/auth/register', {
+      const res = await fetch('https://quiz-app-production-e651.up.railway.app/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password, name, role })
