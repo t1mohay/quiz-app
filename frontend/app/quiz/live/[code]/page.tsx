@@ -38,20 +38,11 @@ export default function LiveQuiz() {
   const [isQuizEnded, setIsQuizEnded] = useState(false);
   const [isWaiting, setIsWaiting] = useState(true);
   const [isConnected, setIsConnected] = useState(false);
-  const [debug, setDebug] = useState<string[]>([]);
 
   const socketRef = useRef<any>(null);
 
-  const addDebug = (msg: string) => {
-    console.log('🔍', msg);
-    setDebug(prev => [...prev, msg]);
-  };
-
   useEffect(() => {
-    addDebug(`🚀 Страница загружена. Комната: ${roomCode}, Имя: ${userName}`);
-
     if (!socketRef.current) {
-      addDebug('🔌 Создаём новое подключение к WebSocket...');
       socketRef.current = io('https://quiz-app-production-e651.up.railway.app', {
         transports: ['websocket', 'polling'],
         reconnection: true,
@@ -65,23 +56,17 @@ export default function LiveQuiz() {
     const socket = socketRef.current;
 
     const onConnect = () => {
-      addDebug(`✅ ПОДКЛЮЧЕНО к WebSocket! ID: ${socket.id}`);
       setIsConnected(true);
-      addDebug(`🔑 Присоединяемся к комнате ${roomCode}...`);
       socket.emit('join-room', roomCode, userName);
     };
 
     const onConnectError = (err: Error) => {
-      addDebug(`❌ Ошибка подключения: ${err.message}`);
       setIsConnected(false);
     };
 
-    const onError = (msg: string) => {
-      addDebug(`❌ Ошибка: ${msg}`);
-    };
+    const onError = (msg: string) => {};
 
     const onQuestion = (data: Question) => {
-      addDebug(`📨 ПОЛУЧЕН ВОПРОС: ${data.questionText}`);
       setQuestion(data);
       setSelectedOption(null);
       setIsAnswered(false);
@@ -102,24 +87,20 @@ export default function LiveQuiz() {
     };
 
     const onScoreUpdate = (data: { score: number }) => {
-      addDebug(`⭐ Обновление счёта: ${data.score}`);
       setScore(data.score);
     };
 
     const onQuizEnded = (data: LeaderboardPlayer[]) => {
-      addDebug(`🏆 Квиз завершён!`);
       setIsQuizEnded(true);
       setLeaderboard(data);
       setQuestion(null);
     };
 
     const onQuizStarted = () => {
-      addDebug(`🎯 Квиз начат!`);
       setIsWaiting(false);
     };
 
     const onDisconnect = (reason: string) => {
-      addDebug(`🔌 Отключено от WebSocket: ${reason}`);
       setIsConnected(false);
     };
 
@@ -150,7 +131,6 @@ export default function LiveQuiz() {
 
   const handleAnswer = (optionId: number) => {
     if (isAnswered || timeLeft === 0) return;
-    addDebug(`📤 Отправка ответа: вопрос ${question?.id}, вариант ${optionId}`);
     setSelectedOption(optionId);
     setIsAnswered(true);
     socketRef.current?.emit('answer', { 
@@ -213,12 +193,6 @@ export default function LiveQuiz() {
             <p className={`text-sm mt-4 ${isConnected ? 'text-green-600' : 'text-red-600'}`}>
               {isConnected ? '🟢 Подключено к серверу' : '🔴 Не подключено к серверу'}
             </p>
-            <div className="mt-4 bg-gray-100 p-3 rounded-lg text-left max-h-60 overflow-auto">
-              <p className="text-xs text-gray-600 font-bold">DEBUG:</p>
-              {debug.map((msg, i) => (
-                <p key={i} className="text-xs text-gray-500">{msg}</p>
-              ))}
-            </div>
           </div>
         </div>
       </div>
@@ -234,12 +208,6 @@ export default function LiveQuiz() {
           <p className={`text-sm mt-4 ${isConnected ? 'text-green-600' : 'text-red-600'}`}>
             {isConnected ? '🟢 Подключено к серверу' : '🔴 Не подключено к серверу'}
           </p>
-          <div className="mt-4 bg-gray-100 p-3 rounded-lg text-left max-h-60 overflow-auto">
-            <p className="text-xs text-gray-600 font-bold">DEBUG:</p>
-            {debug.map((msg, i) => (
-              <p key={i} className="text-xs text-gray-500">{msg}</p>
-            ))}
-          </div>
         </div>
       </div>
     );
