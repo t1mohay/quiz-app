@@ -13,14 +13,20 @@ const app = express();
 const httpServer = createServer(app);
 const io = new SocketServer(httpServer, {
   cors: {
-    origin: "http://localhost:3000",
-    methods: ["GET", "POST"]
+    origin: ['http://localhost:3000', 'https://quiz-app-git-main-franken.vercel.app', 'https://quiz-app-franken.vercel.app'],
+    methods: ["GET", "POST"],
+    credentials: true
   }
 });
 
 const prisma = new PrismaClient();
 
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:3000', 'https://quiz-app-git-main-franken.vercel.app', 'https://quiz-app-franken.vercel.app'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE']
+}));
+
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);
