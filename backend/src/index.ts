@@ -17,7 +17,8 @@ const allowedOrigins = [
   'http://localhost:3000',
   'https://quiz-app-franken.vercel.app',
   'https://quiz-app-git-main-franken.vercel.app',
-  'https://quiz-app-eight-steel-45.vercel.app'
+  'https://quiz-app-eight-steel-45.vercel.app',
+  'https://quiz-ddnc581t3-franken.vercel.app'  // ← ДОБАВЛЕН НОВЫЙ URL
 ];
 
 app.use(cors({

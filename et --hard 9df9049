@@ -1,0 +1,29 @@
+[33mdf28d2a[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m Fix: CORS для нового Vercel URL
+[33m3cf7669[m Fix: quizController с проверкой authorId
+[33mfa3f2d8[m Fix: кеширование звуков для мгновенного воспроизведения
+[33m163fa53[m Fix: глобальная предзагрузка звуков
+[33m7345592[m Fix: мгновенный звук через Web Audio API
+[33mb599d77[m Fix: убрал задержку звука в дашборде
+[33m9c725a7[m Fix: звук и переход на главной
+[33m610515e[m Fix: роутинг и звуки на главной
+[33mc13afc5[m Fix: вернул расстояние между кнопками
+[33m985965e[m Fix: расстояние между кнопками
+[33m4e9f8a5[m Add: звуки на все кнопки
+[33m48ce482[m Fix: предзагрузка звуков
+[33m2d4d61d[m Fix: добавлен импорт ButtonWithSound во все файлы(2)
+[33md4c5ded[m Fix: добавлен импорт ButtonWithSound во все файлы
+[33m7af2bb1[m Add: звуки на все кнопки
+[33ma45d15c[m Add: ButtonWithSound компонент
+[33m932cc60[m Add: локальные звуки
+[33m77dd792[m Add: звуки
+[33m9df9049[m Fix: CORS allow all origins
+[33mfb7251f[m Remove debug from participant screen
+[33m9689170[m Fix: CORS для Vercel
+[33m2e96be1[m Fix: reset SQLite migrations
+[33mef29900[m Fix: правильный HTTPS URL для API
+[33mdd605fb[m Fix: исправлен импорт Socket во всех файлах
+[33m4706f62[m Fix: исправлен импорт Socket в start и live
+[33m72257a9[m Исправление: фронтенд как обычная папка (без подмодуля)
+[33m3651d19[m Обновление фронтенда: API URL для продакшена
+[33ma6e2f96[m Fix: switch to PostgreSQL migrations
+[33m290b16a[m 🎉 Первый коммит: Quiz App MVP
